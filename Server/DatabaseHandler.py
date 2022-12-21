@@ -4,7 +4,6 @@ import re
 import json
 import os
 
-DatabaseDirectory = "/Database.txt" #Change this to the location of the database
 class Format(Enum):
     Date = 0,
     Time = 1,
@@ -13,16 +12,18 @@ class Validation:
     '''
     This is a static class and can be referenced like a namespace requiring no instance
     '''
+    @staticmethod
     def RangeCheck(minvalue, maxvalue, value):
         if(value >= minvalue and value <= maxvalue):
             return True
         return False
+    @staticmethod
     def PresenceCheck(value):
         print(id(value))
         if(id(value) != None and value != None): #id converts value to a pointer and checks if the address isn't null, also checks if value isn't null
             return True
         return False
-
+    @staticmethod
     def LengthCheckStr(value, maxvalue, allowunder):
         '''Prototype function of lengthcheck to allow for it to process strings'''
         allowunder = bool(allowunder)  # cant trust python, lets make sure we get a bool
@@ -30,15 +31,15 @@ class Validation:
             if(len(value) <= maxvalue):
                 return True
         else:
-            if(value.length == maxvalue):
+            if(len(value) == maxvalue):
                 return True
         return False
-    
+    @staticmethod
     def TypeCheck(data, datatype):
         if(isinstance(data,datatype)): # isinstance returns a bool if the data type matches the data
             return True
         return False
-    
+    @staticmethod
     def LengthCheck(value, maxvalue, allowunder):
         if(Validation.TypeCheck(value,str)):
             return Validation.LengthCheckStr(value,maxvalue,allowunder)
@@ -51,7 +52,7 @@ class Validation:
                 return True
         return False
     
-       
+    @staticmethod
     def FormatCheck(data,form):
         if(not Validation.TypeCheck(form,Enum)):
             # we are raising an exception to prevent further execution, This works the same as any error and prevents the application executing unless it is caught. this prevents bad code running and informs the programmer on their misuse
@@ -84,7 +85,7 @@ This class is meant to create the database and write and read from/to the databa
 
     def CreateDatabase(self):
         """
-        Create a new database file and initialize it with an empty JSON object.
+        Create a new database file and initialize it with an empty json object.
         """
         if(not os.path.exists(self.Filename)):
             f = open(self.Filename, 'w')
@@ -107,12 +108,12 @@ This class is meant to create the database and write and read from/to the databa
         row = dict(zip(table['fields'], values))
         table['rows'].append(row)
         # Update the indices
-        for field in table['fields']:
+        for i, field in enumerate(table['fields']):
             if field not in self.Indices[tablename]:
                 self.Indices[tablename][field] = {}
-            if values[field] not in self.Indices[tablename][field]:
-                self.Indices[tablename][field][values[field]] = []
-            self.Indices[tablename][field][values[field]].append(row)
+            if values[i] not in self.Indices[tablename][field]:
+                self.Indices[tablename][field][values[i]] = []
+            self.Indices[tablename][field][values[i]].append(row)
 
     def DeleteField(self, tableName: str, field: str):
         """Delete the field with the given name from the table with the given name."""
@@ -129,7 +130,7 @@ This class is meant to create the database and write and read from/to the databa
         """Delete the table with the given name."""
         del self.Tables[tableName]
         del self.Indices[tableName]
-    
+
     def DeleteRow(self, tableName: str, row: dict):
         """Delete the row from the table with the given name."""
         table = self.Tables[tableName]
@@ -137,7 +138,8 @@ This class is meant to create the database and write and read from/to the databa
         table['rows'].remove(row)
         # Update the indices
         for field, value in row.items():
-            self.Indices[tableName][field][value].remove(row)    
+            self.Indices[tableName][field][value].remove(row)
+
     def UpdateField(self, tableName: str, field: str, newValue: str, row: dict):
         """
         Update the value of the field in the given row in the table with the given name.
@@ -151,7 +153,7 @@ This class is meant to create the database and write and read from/to the databa
         if newValue not in self.Indices[tableName][field]:
             self.Indices[tableName][field][newValue] = []
         self.Indices[tableName][field][newValue].append(row)
-    
+
     def UpdateRow(self, tableName: str, row: dict, newValues: dict):
         """
         Update the values in the given row in the table with the given name.
@@ -165,41 +167,30 @@ This class is meant to create the database and write and read from/to the databa
             if newValue not in self.Indices[tableName][field]:
                 self.Indices[tableName][field][newValue] = []
             self.Indices[tableName][field][newValue].append(row)
-            # Update the value in the row
             row[field] = newValue
-    def Search(table, query, field=None):
+
+    def Search(self, table: dict, searchTerms: dict) -> list:
         """
-        Search the table for rows or fields that match the given query.
-        If a field is specified, the function returns a list of tuples, where each tuple contains the position of the field in the row and the row itself.
-        Otherwise, the function returns a list of rows.
+        Search for rows in the given table that match the given search terms.
         """
-        if field:
-            # If a field is specified, use the index to search for rows with the given field value
-            if field in table['Indices']:
-                if query in table['Indices'][field]:
-                    results = []
-                    for i, row in enumerate(table['Indices'][field][query]):
-                        results.append((i, row))
-                    return results
-            return [] # just null
-        else:
-            # If the query consists of a single field-value pair, use the index
-            if len(query) == 1:
-                field, value = next(iter(query.items()))
-                if field in table['Indices']:
-                    if value in table['Indices'][field]:
-                        return table['Indices'][field][value]
-            # Otherwise, search the table linearly
-            else:
-                results = []
-                for row in table['Rows']:
-                    match = True
-                    for field, value in query.items():
-                        if row[field] != value:
-                            match = False
-                            break
-                    if match:
-                        results.append(row)
-                return results
+        results = []
+        for row in table['rows']:
+            match = True
+            for field, value in searchTerms.items():
+                if row[field] != value:
+                    match = False
+                    break
+            if match:
+                results.append(row)
+        if not results:
+            return None
+        return results
+
+    def Save(self):
+        """
+        Save the database to the file.
+        """
+        with open(self.Filename, 'w') as f:
+            json.dump({'tables': self.Tables, 'indices': self.Indices}, f)
 
 
