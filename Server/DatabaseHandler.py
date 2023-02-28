@@ -95,6 +95,9 @@ This class is meant to create the database and write and read from/to the databa
         """
         Create a table with the given name and fields.
         """
+        if (name in self.Tables):
+            print(f"The table {name} already exists.")
+            return
         self.Tables[name] = {'fields': fields, 'rows': []}
         self.Indices[name] = {}
     

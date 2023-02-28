@@ -22,6 +22,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Client.py" />
+    <Compile Include="GUIConstants.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Sockets.py">
       <SubType>Code</SubType>
     </Compile>

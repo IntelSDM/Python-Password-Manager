@@ -2,6 +2,7 @@ import ssl
 import socket
 import sys
 import select
+import sys
 # Generate a self-signed certificate and key
 CertPath = 'Certs/PythonServer.crt'
 KeyPath = 'Certs/PythonServer.key'
@@ -12,27 +13,10 @@ class Sockets:
     def RecieveMessage(self):
         # Initialize an empty buffer to hold the message
         buffer = bytearray()
-
-        # Keep reading until the connection is closed or the message is complete
         while True:
-            # Use select to check if there is data available to be read
-            rlist, _, _ = select.select([self.ClientSocket], [], [], 0)
-            if rlist:
-                # Read a chunk of the message
-                chunk = self.ClientSocket.recv(4096)
-
-                # If the chunk is empty, the connection has been closed
-                if not chunk:
-                    raise ConnectionError('Connection closed by other end')
-
-                # Add the chunk to the buffer
-                buffer.extend(chunk)
-            else:
-                # No data available to be read, so we can break out of the loop
-                break
-
-        # Decode the message and return it
-        return buffer.decode()
+            chunk = self.ClientSocket.recv(4096).decode() # Recieve on itteration for multiple messages and decode them
+            if(chunk != None):
+                return chunk # Loop Until Nothing Is Left. Dont Add Empty Chunk To Buffer. Return When Nothing Left
     def SendMessage(self, message:str):
         # Check if the client socket is still open
         if self.ClientSocket is not None:
@@ -49,7 +33,7 @@ class Sockets:
         self.ServerSocket = socket.socket()
 
         # Bind the socket to a port
-        self.ServerSocket.bind(('localhost', 8000))
+        self.ServerSocket.bind(('localhost', 8008))
 
         # Listen for incoming connections
         self.ServerSocket.listen()
