@@ -102,6 +102,7 @@ This class is meant to create the database and write and read from/to the databa
         newtwofactor = str("".join(random.choices(string.ascii_letters + string.digits, k=12))) # Creates a 12 character long random string with numbers and chars
         self.Cursor.execute("UPDATE Users Set Password = ? WHERE Username = ? And TwoFactor = ?",newpassword,username,sha256(twofactor.encode("utf-8")).hexdigest()) # Update the password for the user, double check their twofactor
         self.Cursor.execute("UPDATE Users Set TwoFactor = ? WHERE Username = ? And Password = ?",sha256(newtwofactor.encode("utf-8")).hexdigest(),username,sha256(newpassword.encode("utf-8")).hexdigest()) # Update the twofactor code
+        self.Conn.commit()
         return("Successful Password Reset. New Two Factor Code: ",newtwofactor) # Operation successful. Inform the user of their new two factor code.
 
     def CheckLogin(self, username:str,password:str):
@@ -136,6 +137,9 @@ This class is meant to create the database and write and read from/to the databa
         self.Conn.commit()
         return("Successful Registration")
     def Close(self):
-        self.Conn.close()
-
+        """
+        Close connection to database and commit any uncommitted changed to the database.
+        """
+        self.Conn.commit()
+        self.Conn.close() 
 
