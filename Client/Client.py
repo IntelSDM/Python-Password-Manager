@@ -25,7 +25,7 @@ def Login():
     time.sleep(1)
     Sock.SendMessage(TxtLoginPassword.get("1.0", "end")) # Send the reading of the textbox from start to end
     Response = Sock.RecieveMessage()
-    DrawMessageBox(MSGReason.Info,"Login Response",Response)
+    DrawMessageBox(MSGReason.Info,"Login Response",Response) # Display the respsonse from the server to the client
 
 def Register():
     Sock.SendMessage("Register") # Tell the server we are registering
@@ -34,5 +34,5 @@ def Register():
     time.sleep(1)
     Sock.SendMessage(TxtRegisterPassword.get("1.0", "end")) # Send the reading of the textbox from start to end
     Response = Sock.RecieveMessage()
-    DrawMessageBox(MSGReason.Info,"Register Response",Response)
+    DrawMessageBox(MSGReason.Info,"Register Response",Response) # Display the response from the server to the client
 Main() # Execute Main

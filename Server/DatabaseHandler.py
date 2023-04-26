@@ -1,7 +1,8 @@
 
 from enum import Enum
 import re
-import json
+import sqlite3
+from hashlib import sha256
 import os
 
 class Format(Enum):
@@ -19,7 +20,6 @@ class Validation:
         return False
     @staticmethod
     def PresenceCheck(value):
-        print(id(value))
         if(id(value) != None and value != None): #id converts value to a pointer and checks if the address isn't null, also checks if value isn't null
             return True
         return False
@@ -76,124 +76,66 @@ This class is meant to create the database and write and read from/to the databa
     """
     def __init__(self, filename: str):
         """
-        Initialize the database and create an empty file to store tables.
+        Initialize the database.
         """
         self.Filename = filename
-        self.Tables = {}
-        self.Indices = {}
         self.CreateDatabase()
 
     def CreateDatabase(self):
         """
-        Create a new database file and initialize it with an empty json object.
+        Check if our database is avaliable. Load it or prompt an error if it is unavaliable
         """
         if(not os.path.exists(self.Filename)):
-            f = open(self.Filename, 'w')
-            json.dump({}, f)
-            
-    def CreateTable(self, name: str, fields: list):
-        """
-        Create a table with the given name and fields.
-        """
-        if (name in self.Tables):
-            print(f"The table {name} already exists.")
-            return
-        self.Tables[name] = {'fields': fields, 'rows': []}
-        self.Indices[name] = {}
-    
-    def Insert(self, tablename: str, values: list):
-        """
-        Insert a row into the table with the given values.
-        """
-        table = self.Tables[tablename]
-        if len(values) != len(table['fields']):
-            raise ValueError('Number of values does not match number of fields')
-        row = dict(zip(table['fields'], values))
-        table['rows'].append(row)
-        # Update the indices
-        for i, field in enumerate(table['fields']):
-            if field not in self.Indices[tablename]:
-                self.Indices[tablename][field] = {}
-            if values[i] not in self.Indices[tablename][field]:
-                self.Indices[tablename][field][values[i]] = []
-            self.Indices[tablename][field][values[i]].append(row)
+            raise DBError("Database Not Found: " + self.Filename)
+        else:
+            self.Conn = sqlite3.connect(self.Filename)
+            self.Cursor = self.Conn.cursor()
+    def ResetPassword(self, username:str, twofactor:str,newpassword:str):
+        self.Cursor.execute("SELECT * FROM Users WHERE Username=?", (username,)) # Query for the database
+        validusername = not self.Cursor.fetchone() # Check if instance >= 1
+        if(validusername):
+            return("Username Is Invalid") #Username doesn't exist
+        self.Cursor.execute("SELECT * FROM Users WHERE Username=? And TwoFactor=?", (username,sha256(twofactor.encode("utf-8")).hexdigest())) # Query for the database
+        validtwofactor = not self.Cursor.fetchone() # Check if instance >= 1
+        if(validtwofactor):
+            return("Two Factor Code Is Invalid") #Two factor mistmatch
+        newtwofactor = str("".join(random.choices(string.ascii_letters + string.digits, k=12))) # Creates a 12 character long random string with numbers and chars
+        self.Cursor.execute("UPDATE Users Set Password = ? WHERE Username = ? And TwoFactor = ?",newpassword,username,sha256(twofactor.encode("utf-8")).hexdigest()) # Update the password for the user, double check their twofactor
+        self.Cursor.execute("UPDATE Users Set TwoFactor = ? WHERE Username = ? And Password = ?",sha256(newtwofactor.encode("utf-8")).hexdigest(),username,sha256(newpassword.encode("utf-8")).hexdigest()) # Update the twofactor code
+        return("Successful Password Reset. New Two Factor Code: ",newtwofactor) # Operation successful. Inform the user of their new two factor code.
 
-    def DeleteField(self, tableName: str, field: str):
-        """Delete the field with the given name from the table with the given name."""
-        table = self.Tables[tableName]
-        # Remove the field from the fields list
-        table['fields'].remove(field)
-        # Remove the field from the indices
-        del self.Indices[tableName][field]
-        # Update the rows in the table
-        for row in table['rows']:
-            del row[field]
-    
-    def DeleteTable(self, tableName: str):
-        """Delete the table with the given name."""
-        del self.Tables[tableName]
-        del self.Indices[tableName]
+    def CheckLogin(self, username:str,password:str):
+        if(not Validation.PresenceCheck(password)):
+            return ("Please Enter A Password") # Check if the password is null
+        if(not Validation.PresenceCheck(username)):
+            return ("Please Enter A Username") # Check if the username is null
+        self.Cursor.execute("SELECT * FROM Users WHERE Username=?", (username,)) # Query for the database
+        validusername = not self.Cursor.fetchone() # Check if instance >= 1
+        if(validusername):
+            return("Username Is Invalid") #Username doesn't exist
+        self.Cursor.execute("SELECT * FROM Users WHERE Username=? And Password=?", (username,password)) # Query if the user exists
+        validuserpass = self.Cursor.fetchone() # Check if instance >= 1
+        if(validuserpass):
+            return("Login Success")
+        else:
+            return("Invalid Password")
+    def AddUser(self, username:str,password:str,twofactor:str):
+        """
+        Adds a user to the User to the User table Through inserting the username, password, twofactor code
+        """
+        if(Validation.LengthCheckStr(username,4,True)):
+            return ("Username Too Short, It Must Exceed 3 Characters") # Username length check
+        if(Validation.LengthCheckStr(username,9,True)):
+            return ("Password Too Short, It Must Exceeed 8 Characters") # Password length check
 
-    def DeleteRow(self, tableName: str, row: dict):
-        """Delete the row from the table with the given name."""
-        table = self.Tables[tableName]
-        # Remove the row from the rows list
-        table['rows'].remove(row)
-        # Update the indices
-        for field, value in row.items():
-            self.Indices[tableName][field][value].remove(row)
-
-    def UpdateField(self, tableName: str, field: str, newValue: str, row: dict):
-        """
-        Update the value of the field in the given row in the table with the given name.
-        """
-        table = self.Tables[tableName]
-        # Update the value in the row
-        row[field] = newValue
-        # Update the index
-        oldValue = row[field]
-        self.Indices[tableName][field][oldValue].remove(row)
-        if newValue not in self.Indices[tableName][field]:
-            self.Indices[tableName][field][newValue] = []
-        self.Indices[tableName][field][newValue].append(row)
-
-    def UpdateRow(self, tableName: str, row: dict, newValues: dict):
-        """
-        Update the values in the given row in the table with the given name.
-        """
-        table = self.Tables[tableName]
-        # Update the values in the row
-        for field, newValue in newValues.items():
-            # Update the index
-            oldValue = row[field]
-            self.Indices[tableName][field][oldValue].remove(row)
-            if newValue not in self.Indices[tableName][field]:
-                self.Indices[tableName][field][newValue] = []
-            self.Indices[tableName][field][newValue].append(row)
-            row[field] = newValue
-
-    def Search(self, table: dict, searchTerms: dict) -> list:
-        """
-        Search for rows in the given table that match the given search terms.
-        """
-        results = []
-        for row in table['rows']:
-            match = True
-            for field, value in searchTerms.items():
-                if row[field] != value:
-                    match = False
-                    break
-            if match:
-                results.append(row)
-        if not results:
-            return None
-        return results
-
-    def Save(self):
-        """
-        Save the database to the file.
-        """
-        with open(self.Filename, 'w') as f:
-            json.dump({'tables': self.Tables, 'indices': self.Indices}, f)
+        self.Cursor.execute("SELECT * FROM Users WHERE Username=?", (username,)) # Query for the database
+        validusername = self.Cursor.fetchone() # Check if instance >= 1
+        if(validusername):
+            return("Username Is Already Taken") #Username taken, return, tell client
+        self.Cursor.execute("INSERT INTO Users (Username, Password, TwoFactor) VALUES (?, ?, ?)", (username, sha256(password.encode("utf-8")).hexdigest(),sha256(twofactor.encode("utf-8")).hexdigest()))
+        self.Conn.commit()
+        return("Successful Registration")
+    def Close(self):
+        self.Conn.close()
 
 

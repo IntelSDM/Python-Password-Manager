@@ -21,7 +21,9 @@ class MSGReason(enum.Enum):
     Warning = 1
     Info = 2
     Error = 3
+
 def DrawMessageBox(reason:MSGReason,header: str, information: str):
+    # Check the reason for the message and then create a different messagebox for different reasons
     if(reason == MSGReason.Error):
          messagebox.showerror(header, information)
     if(reason == MSGReason.Info):
