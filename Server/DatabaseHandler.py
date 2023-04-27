@@ -5,6 +5,8 @@ import sqlite3
 from hashlib import sha256
 import os
 
+
+
 class Format(Enum):
     Date = 0,
     Time = 1,
@@ -90,6 +92,7 @@ This class is meant to create the database and write and read from/to the databa
         else:
             self.Conn = sqlite3.connect(self.Filename)
             self.Cursor = self.Conn.cursor()
+
     def ResetPassword(self, username:str, twofactor:str,newpassword:str):
         self.Cursor.execute("SELECT * FROM Users WHERE Username=?", (username,)) # Query for the database
         validusername = not self.Cursor.fetchone() # Check if instance >= 1
