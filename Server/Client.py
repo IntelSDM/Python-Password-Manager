@@ -51,7 +51,7 @@ class Client():
         Therefore it wont be as cpu consuming as expected even when running 100s of virtual threads.
         The database has to be created in this thread as it will be accessed from the thread. Thread safety. 
         """
-        self.Database = DatabaseHandler.Database("Database.db") # Initial Db Instance
+        self.Database = DatabaseHandler.Database("Database.db") # Initial DB Instance
         while(True):
             if(self.ClientSocket == None):
                 break # Check if the client is still alive

@@ -138,7 +138,7 @@ This class is meant to create the database and write and read from/to the databa
             return("Username Is Already Taken") #Username taken, return, tell client
         self.Cursor.execute("INSERT INTO Users (Username, Password, TwoFactor) VALUES (?, ?, ?)", (username, sha256(password.encode("utf-8")).hexdigest(),sha256(twofactor.encode("utf-8")).hexdigest()))
         self.Conn.commit()
-        return("Successful Registration")
+        return("Successful Registration, Please Write Down Your Two Factor Key: "+ str(twofactor))
     def Close(self):
         """
         Close connection to database and commit any uncommitted changed to the database.
