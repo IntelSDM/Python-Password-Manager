@@ -25,10 +25,10 @@ class Sockets:
     def Start(self):
         # Create a socket
         self.ServerSocket = socket.socket()
-
         # Bind the socket to a port
         self.ServerSocket.bind(('localhost', 8008))
-
+        # Listen for incoming connections
+        self.ServerSocket.listen()
         
         
     def Listen(self):
@@ -36,8 +36,6 @@ class Sockets:
         Listening thread, Listen for new client connections and add them to the client list
         """
         while(True):
-            # Listen for incoming connections
-            self.ServerSocket.listen()
 
             # Accept an incoming connection
             self.ClientSocket, self.ClientAddress = self.ServerSocket.accept()

@@ -37,16 +37,12 @@ class Client():
         self.Username = self.RecieveMessage() # Get username
         self.Password = self.RecieveMessage() # Get password
         self.SendMessage(self.Database.CheckLogin(self.Username,self.Password))
-        self.Database.Close()
-        self.Close()
 
     def Register(self):
         self.Username = self.RecieveMessage()
         self.Password = self.RecieveMessage()
         self.TwoFactor =  str("".join(random.choices(string.ascii_letters + string.digits, k=12))) # Creates a 12 character long random string with numbers and chars
         self.SendMessage(self.Database.AddUser(self.Username,self.Password,self.TwoFactor))
-        self.Database.Close()
-        self.Close()
 
     def HandleCommands(self):
         """
@@ -57,9 +53,12 @@ class Client():
         """
         self.Database = DatabaseHandler.Database("Database.db") # Initial Db Instance
         while(True):
-            print("test")
+            if(self.ClientSocket == None):
+                break # Check if the client is still alive
             Message = self.RecieveMessage()
             if(Message == "Login"):
                 self.Login() # Client is logging in
             if(Message == "Register"):
                 self.Register()# Client is registering
+        self.Database.Close()
+        self.ClientSocket.close()

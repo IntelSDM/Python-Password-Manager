@@ -129,7 +129,7 @@ This class is meant to create the database and write and read from/to the databa
         """
         if(Validation.LengthCheckStr(username,4,True)):
             return ("Username Too Short, It Must Exceed 3 Characters") # Username length check
-        if(Validation.LengthCheckStr(username,9,True)):
+        if(Validation.LengthCheckStr(password,9,True)):
             return ("Password Too Short, It Must Exceeed 8 Characters") # Password length check
 
         self.Cursor.execute("SELECT * FROM Users WHERE Username=?", (username,)) # Query for the database
