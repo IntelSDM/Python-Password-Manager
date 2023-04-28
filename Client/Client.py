@@ -3,6 +3,7 @@ from GUIConstants import LoginWindow
 from GUIConstants import TxtLoginPassword
 from GUIConstants import TxtLoginUsername
 from GUIConstants import TxtRegisterPassword
+from GUIConstants import TxtRegisterConfirmPassword
 from GUIConstants import TxtRegisterUsername
 from GUIConstants import BtnLogin
 from GUIConstants import BtnRegister
@@ -28,6 +29,10 @@ def Login():
     DrawMessageBox(MSGReason.Info,"Login Response",Response) # Display the respsonse from the server to the client
 
 def Register():
+    if(TxtRegisterPassword.get("1.0", "end") !=  TxtRegisterConfirmPassword.get("1.0", "end")):
+        DrawMessageBox(MSGReason.Error,"Password Mistmatch", "Password Mistmatch")
+        return
+
     Sock.SendMessage("Register") # Tell the server we are registering
     time.sleep(1)
     Sock.SendMessage(TxtRegisterUsername.get("1.0", "end")) # Send the reading of the textbox from start to end

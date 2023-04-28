@@ -58,8 +58,15 @@ LblRegisterPassword = tk.Label(TabRegister, text="Password:",font=("Segoe UI", 1
 LblRegisterPassword.place(x=150,y=50)
 TxtRegisterPassword = tk.Text(TabRegister, width=25, height=1)
 TxtRegisterPassword.place(x=85, y = 75)
+LblRegisterConfirmPassword = tk.Label(TabRegister, text="Confirm Password:",font=("Segoe UI", 10))
+LblRegisterConfirmPassword.place(x=128,y=100)
+TxtRegisterConfirmPassword = tk.Text(TabRegister, width=25, height=1)
+TxtRegisterConfirmPassword.place(x=85, y = 125)
 BtnRegister = tk.Button(TabRegister, text="Register", command=LoginWindow.withdraw,font=("Segoe UI", 10))
-BtnRegister.place(x=150,y = 100)
+BtnRegister.place(x=150,y = 150)
+
+TabResetPassword = ttk.Frame(notebook)
+notebook.add(TabResetPassword, text="Reset Password")
 
 notebook.place(x=0, y=0)
 #DrawMessageBox(MSGReason.Error,"header","Info")
