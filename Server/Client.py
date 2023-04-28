@@ -43,7 +43,11 @@ class Client():
         self.Password = self.RecieveMessage()
         self.TwoFactor =  str("".join(random.choices(string.ascii_letters + string.digits, k=12))) # Creates a 12 character long random string with numbers and chars
         self.SendMessage(self.Database.AddUser(self.Username,self.Password,self.TwoFactor))
-
+    def ResetPassword(self):
+        self.Username = self.RecieveMessage()
+        self.Password = self.RecieveMessage()
+        self.TwoFactor = self.RecieveMessage()
+        self.SendMessage(self.Database.ResetPassword(self.Username,self.TwoFactor,self.Password))
     def HandleCommands(self):
         """
         Allows us to handle commands and then call functions in an event based system.
@@ -60,5 +64,7 @@ class Client():
                 self.Login() # Client is logging in
             if(Message == "Register"):
                 self.Register()# Client is registering
+            if(Message == "Resetting Password"):
+                self.ResetPassword() # Client is resetting password
         self.Database.Close()
         self.ClientSocket.close()
