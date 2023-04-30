@@ -25,6 +25,9 @@
     <Compile Include="GUIConstants.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Server.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Sockets.py">
       <SubType>Code</SubType>
     </Compile>

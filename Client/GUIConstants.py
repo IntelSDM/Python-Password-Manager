@@ -5,12 +5,19 @@ from tkinter import messagebox
 #from Client import Login
 LoginWindow = tk.Tk()
 
-LoginWindow.title("My Window")
+LoginWindow.title("Login")
 LoginWindow.geometry("400x225")
 style = ttk.Style()
 style.configure('TNotebook.Tab', padding=(6, 2), font=('Segoe UI', 9))
 notebook = ttk.Notebook(LoginWindow,width=400, height=225)
 
+ProductWindow = tk.Tk()
+ProductWindow.title("Manage Products")
+ProductWindow.geometry("600x750")
+ProductStyle = ttk.Style()
+ProductStyle.configure('TNotebook.Tab', padding=(6, 2), font=('Segoe UI', 9))
+ProductNotebook = ttk.Notebook(ProductWindow,width=600, height=750)
+#ProductWindow.withdraw()
 #Change this to save a password. then we auto read it
 def RememberPasswordToggle():
     if RememberPassword == True:
@@ -80,9 +87,25 @@ LblResetPasswordTwoFactor.place(x=128,y=100)
 TxtResetPasswordTwoFactor = tk.Text(TabResetPassword, width=25, height=1)
 TxtResetPasswordTwoFactor.place(x=85, y = 125)
 BtnResetPassword = tk.Button(TabResetPassword, text="Reset Password", command=LoginWindow.withdraw,font=("Segoe UI", 10))
-BtnResetPassword.place(x=150,y = 150)
+BtnResetPassword.place(x=130,y = 150)
+
+TabServers = ttk.Frame(ProductNotebook)
+ProductNotebook.add(TabServers, text="Server")
+ServerListBox = tk.Listbox(TabServers,width = 50,height = 30)
+ServerListBox.place(x=0,y = 0)
+TabSupport = ttk.Frame(ProductNotebook)
+BtnRefresh = tk.Button(TabServers, text="Refresh", command=ProductWindow.withdraw,font=("Segoe UI", 10))
+BtnRefresh.place(x=310,y = 5)
+
+ProductNotebook.add(TabSupport, text="Support")
+
+TabSettings = ttk.Frame(ProductNotebook)
+ProductNotebook.add(TabSettings, text="Settings")
 
 notebook.place(x=0, y=0)
+ProductNotebook.place(x=0,y=0)
+
+
 #DrawMessageBox(MSGReason.Error,"header","Info")
 
 
