@@ -4,7 +4,8 @@ import re
 import sqlite3
 from hashlib import sha256
 import os
-
+import random
+import string
 
 
 class Format(Enum):
@@ -94,6 +95,11 @@ This class is meant to create the database and write and read from/to the databa
             self.Cursor = self.Conn.cursor()
 
     def ResetPassword(self, username:str, twofactor:str,newpassword:str):
+        print(username)
+        print(twofactor)
+        print(newpassword)
+        if(Validation.LengthCheckStr(newpassword,8,True)):
+            return ("Password Too Short, It Must Exceeed 8 Characters") # Password length check
         self.Cursor.execute("SELECT * FROM Users WHERE Username=?", (username,)) # Query for the database
         validusername = not self.Cursor.fetchone() # Check if instance >= 1
         if(validusername):
@@ -103,12 +109,15 @@ This class is meant to create the database and write and read from/to the databa
         if(validtwofactor):
             return("Two Factor Code Is Invalid") #Two factor mistmatch
         newtwofactor = str("".join(random.choices(string.ascii_letters + string.digits, k=12))) # Creates a 12 character long random string with numbers and chars
-        self.Cursor.execute("UPDATE Users Set Password = ? WHERE Username = ? And TwoFactor = ?",newpassword,username,sha256(twofactor.encode("utf-8")).hexdigest()) # Update the password for the user, double check their twofactor
-        self.Cursor.execute("UPDATE Users Set TwoFactor = ? WHERE Username = ? And Password = ?",sha256(newtwofactor.encode("utf-8")).hexdigest(),username,sha256(newpassword.encode("utf-8")).hexdigest()) # Update the twofactor code
+        self.Cursor.execute("UPDATE Users Set Password = ? WHERE Username = ? And TwoFactor = ?",(sha256(newpassword.encode("utf-8")).hexdigest(),username,sha256(twofactor.encode("utf-8")).hexdigest())) # Update the password for the user, double check their twofactor
+        self.Cursor.execute("UPDATE Users Set TwoFactor = ? WHERE Username = ? And Password = ?",(sha256(newtwofactor.encode("utf-8")).hexdigest(),username,sha256(newpassword.encode("utf-8")).hexdigest())) # Update the twofactor code
         self.Conn.commit()
-        return("Successful Password Reset. New Two Factor Code: ",newtwofactor) # Operation successful. Inform the user of their new two factor code.
+        print(newtwofactor)
+        return("Successful Password Reset. New Two Factor Code: " + newtwofactor) # Operation successful. Inform the user of their new two factor code.
 
     def CheckLogin(self, username:str,password:str):
+        print(username)
+        print(password)
         if(not Validation.PresenceCheck(password)):
             return ("Please Enter A Password") # Check if the password is null
         if(not Validation.PresenceCheck(username)):
@@ -117,7 +126,7 @@ This class is meant to create the database and write and read from/to the databa
         validusername = not self.Cursor.fetchone() # Check if instance >= 1
         if(validusername):
             return("Username Is Invalid") #Username doesn't exist
-        self.Cursor.execute("SELECT * FROM Users WHERE Username=? And Password=?", (username,password)) # Query if the user exists
+        self.Cursor.execute("SELECT * FROM Users WHERE Username=? And Password=?", (username,sha256(password.encode("utf-8")).hexdigest())) # Query if the user exists
         validuserpass = self.Cursor.fetchone() # Check if instance >= 1
         if(validuserpass):
             return("Login Success")
@@ -127,9 +136,12 @@ This class is meant to create the database and write and read from/to the databa
         """
         Adds a user to the User to the User table Through inserting the username, password, twofactor code
         """
-        if(Validation.LengthCheckStr(username,4,True)):
+        print(username)
+        print(password)
+        print(twofactor)
+        if(Validation.LengthCheckStr(username,3,True)):
             return ("Username Too Short, It Must Exceed 3 Characters") # Username length check
-        if(Validation.LengthCheckStr(password,9,True)):
+        if(Validation.LengthCheckStr(password,8,True)):
             return ("Password Too Short, It Must Exceeed 8 Characters") # Password length check
 
         self.Cursor.execute("SELECT * FROM Users WHERE Username=?", (username,)) # Query for the database
