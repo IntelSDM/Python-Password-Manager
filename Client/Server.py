@@ -2,7 +2,7 @@ class Server:
     def __init__(self, serverid:str ):
         self.ServerID = serverid
 
-    def SetPassword(selfpassword:str):
+    def SetPassword(self,password:str):
         self.Password = password
 
     def SetUsername(self,username:str):

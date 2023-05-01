@@ -14,9 +14,17 @@ from GUIConstants import BtnResetPassword
 from GUIConstants import MSGReason
 from GUIConstants import DrawMessageBox
 from GUIConstants import ServerListBox
-from GUIConstants import BtnRefresh
+from GUIConstants import LblSelectedServerName
+from GUIConstants import LblSelectedServerPassword
+from GUIConstants import TxtInputServerName
+from GUIConstants import TxtInputServerUsername
+from GUIConstants import TxtInputServerPassword
+from GUIConstants import BtnInputServer
+
 import time
 import Server
+import string
+import random
 import threading
 # Main is our initializer for general usage
 
@@ -31,6 +39,11 @@ def Main():
     ServerList.append(test2)
     test1.SetServerName("test1")
     test2.SetServerName("test2")
+    test1.SetPassword("test1")
+    test2.SetPassword("test2")
+    test1.SetUsername("test1")
+    test2.SetUsername("test2")
+    ServerListBox.bind("<<ListboxSelect>>",RefreshSelected)
     i = 0
     for server in ServerList:
         ServerListBox.insert(i,server.ServerName)
@@ -41,15 +54,26 @@ def Main():
 
     # Sock.Start()
     BtnLogin.config(command = Login) # Set login button functional
-    BtnRefresh.config(command = RefreshSelected) # Set refresh button function
     BtnRegister.config(command = Register) # Set Register button functional
     BtnResetPassword.config(command = ResetPassword) # Set Reset Password button functional
+    BtnInputServer.config(command = AddAccount)
     LoginWindow.mainloop() # Draw the window
     ProductWindow.mainloop() # Draw the product window
 # on lets say changing the password on the button of changing the password lets send the server a message to update the password
-def RefreshSelected():
+def RefreshSelected(event):
         if(len(ServerList)>0):
-            CurrentSelectedServer = ServerListBox.curselection()
+            CurrentSelectedServer = ServerList[ServerListBox.curselection()[0]]
+            LblSelectedServerPassword.config(text="Server Password: " + CurrentSelectedServer.Password)
+            LblSelectedServerName.config(text="Username: " + CurrentSelectedServer.Username)
+def AddAccount():
+    addserver = None
+    addserver = Server.Server(str("".join(random.choices(string.ascii_letters + string.digits, k=12))))
+    addserver.SetServerName(TxtInputServerName.get("1.0", "end-1c"))
+    addserver.SetUsername(TxtInputServerUsername.get("1.0", "end-1c"))
+    addserver.SetPassword(TxtInputServerPassword.get("1.0", "end-1c"))
+    ServerList.append(addserver)
+    ServerListBox.insert(len(ServerList) +1,addserver.ServerName)
+
 
 def RecieveServers():
     Sock.SendMessage("Send Servers")
@@ -59,6 +83,8 @@ def RecieveServers():
         tempserver.SetServerName(Sock.RecieveMessage())
         tempserver.SetUsername(Sock.RecieveMessage())
         tempserver.SetPassword(Sock.RecieveMessage())
+        ServerList.append(tempserver)
+        tempserver = None
 
         
 def ResetPassword():

@@ -48,6 +48,9 @@ class Client():
         self.Password = self.RecieveMessage()
         self.TwoFactor = self.RecieveMessage()
         self.SendMessage(self.Database.ResetPassword(self.Username,self.TwoFactor,self.Password))
+  #  def SendServers(self):
+        #loop all servers in db, send them all
+
     def HandleCommands(self):
         """
         Allows us to handle commands and then call functions in an event based system.
