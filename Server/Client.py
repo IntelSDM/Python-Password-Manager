@@ -37,7 +37,10 @@ class Client():
     def Login(self):
         self.Username = self.RecieveMessage() # Get username
         self.Password = self.RecieveMessage() # Get password
-        self.SendMessage(self.Database.CheckLogin(self.Username,self.Password))
+        login = self.Database.CheckLogin(self.Username,self.Password)
+        if(login == "Login Success"):
+            self.LoggedIn = True
+        self.SendMessage(login)
 
     def Register(self):
         self.Username = self.RecieveMessage()
@@ -52,14 +55,20 @@ class Client():
   #  def SendServers(self):
         #loop all servers in db, send them all
     def DeleteServer(self):
+        if(self.LoggedIn == False):
+            return
         self.Database.DeleteServer(self.RecieveMessage())
     def CreateServer(self):
+        if(self.LoggedIn == False):
+            return
         sid = self.RecieveMessage()
         name = self.RecieveMessage()
         user = self.RecieveMessage()
         password = self.RecieveMessage()
         self.Database.AddServer(sid,self.Username,name,user,password)
     def SendServers(self):
+        if(self.LoggedIn == False):
+            return
         servers = []
         servers = self.Database.GetServers(self.Username)
         self.SendMessage(str(len(servers))) # Send the amount of data to the client

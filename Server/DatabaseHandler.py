@@ -146,6 +146,7 @@ This class is meant to create the database and write and read from/to the databa
 
         return servers
     def DeleteServer(self,serverid:str):
+        print(serverid)
         self.Cursor.execute("DELETE FROM Servers WHERE ServerID = ?", (serverid,))
         self.Conn.commit()
     def AddUser(self, username:str,password:str,twofactor:str):

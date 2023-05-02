@@ -22,6 +22,8 @@ from GUIConstants import TxtInputServerPassword
 from GUIConstants import BtnInputServer
 from GUIConstants import BtnSelectedRemove
 from GUIConstants import ProductWindow
+from GUIConstants import BtnCopyServerPassword
+from GUIConstants import BtnCopyServerName
 import time
 import Server
 import string
@@ -50,6 +52,9 @@ def Main():
     BtnResetPassword.config(command = ResetPassword) # Set Reset Password button functional
     BtnInputServer.config(command = AddAccount)
     BtnSelectedRemove.config(command = RemoveAccount)
+    BtnCopyServerPassword.config(command = CopyPassword)
+    BtnCopyServerName.config(command = CopyUsername)
+
     LoginWindow.mainloop() # Draw the window
     ProductWindow.mainloop() # Draw the product window
 # on lets say changing the password on the button of changing the password lets send the server a message to update the password
@@ -78,11 +83,11 @@ def AddAccount():
 def RemoveAccount():
     if(ServerListBox.curselection()[0] == None):
         return
-    del ServerList[ServerListBox.curselection()[0]]
-    ServerListBox.delete(ServerListBox.curselection()[0])
     Sock.SendMessage("Delete Server")
     time.sleep(1)
     Sock.SendMessage(ServerList[ServerListBox.curselection()[0]].ServerID)
+    del ServerList[ServerListBox.curselection()[0]]
+    ServerListBox.delete(ServerListBox.curselection()[0])
 
 def RecieveServers():
     Sock.SendMessage("Send Servers")
@@ -116,10 +121,17 @@ def Login():
     Sock.SendMessage(TxtLoginPassword.get("1.0", "end-1c")) # Send the reading of the textbox from start to end
     Response = Sock.RecieveMessage()
     DrawMessageBox(MSGReason.Info,"Login Response",Response) # Display the respsonse from the server to the client
+    if(Response != "Login Success"):
+        return
     RecieveServers()
     ProductWindow.deiconify()
+    LoginWindow.withdraw()
     
-
+def CopyUsername():
+    LoginWindow.clipboard_append(ServerList[ServerListBox.curselection()[0]].Username)
+    
+def CopyPassword():
+    LoginWindow.clipboard_append(ServerList[ServerListBox.curselection()[0]].Password)
 def Register():
     if(TxtRegisterPassword.get("1.0", "end") !=  TxtRegisterConfirmPassword.get("1.0", "end")):
         DrawMessageBox(MSGReason.Error,"Password Mistmatch", "Password Mistmatch")
