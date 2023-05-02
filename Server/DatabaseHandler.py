@@ -132,6 +132,22 @@ This class is meant to create the database and write and read from/to the databa
             return("Login Success")
         else:
             return("Invalid Password")
+    def AddServer(self, serverid:str,username:str,servername:str,serverusername:str,serverpassword:str):
+        self.Cursor.execute("INSERT INTO Servers (ServerID, UserID ,ServerName, ServerUsername,ServerPassword) VALUES (?, ?, ?,?,?)", (serverid,username,servername,serverusername,serverpassword))
+        self.Conn.commit()
+    def GetServers(self,username:str):
+        servers = []
+        self.Cursor.execute("SELECT * FROM servers WHERE UserID = ?",(username,))
+        rows = self.Cursor.fetchall()
+        for row in rows:
+            for word in row:
+                if word != username:
+                    servers.append(word)
+
+        return servers
+    def DeleteServer(self,serverid:str):
+        self.Cursor.execute("DELETE FROM Servers WHERE ServerID = ?", (serverid,))
+        self.Conn.commit()
     def AddUser(self, username:str,password:str,twofactor:str):
         """
         Adds a user to the User to the User table Through inserting the username, password, twofactor code

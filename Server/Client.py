@@ -3,6 +3,7 @@ import threading
 import string
 import random
 import DatabaseHandler
+import time
 
 
 
@@ -50,7 +51,24 @@ class Client():
         self.SendMessage(self.Database.ResetPassword(self.Username,self.TwoFactor,self.Password))
   #  def SendServers(self):
         #loop all servers in db, send them all
-
+    def DeleteServer(self):
+        self.Database.DeleteServer(self.RecieveMessage())
+    def CreateServer(self):
+        sid = self.RecieveMessage()
+        name = self.RecieveMessage()
+        user = self.RecieveMessage()
+        password = self.RecieveMessage()
+        self.Database.AddServer(sid,self.Username,name,user,password)
+    def SendServers(self):
+        servers = []
+        servers = self.Database.GetServers(self.Username)
+        self.SendMessage(str(len(servers))) # Send the amount of data to the client
+        i = 0
+        for server in servers:
+            i = i+1
+            if(i%4 == 0):
+                time.sleep(1) # Allow both programs  to sync
+            self.SendMessage(server)
     def HandleCommands(self):
         """
         Allows us to handle commands and then call functions in an event based system.
@@ -69,5 +87,11 @@ class Client():
                 self.Register()# Client is registering
             if(Message == "Resetting Password"):
                 self.ResetPassword() # Client is resetting password
+            if(Message == "Delete Server"):
+                self.DeleteServer()
+            if(Message == "Create Server"):
+                self.CreateServer()
+            if(Message == "Send Servers"):
+                self.SendServers()
         self.Database.Close()
         self.ClientSocket.close()

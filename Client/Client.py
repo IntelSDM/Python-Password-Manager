@@ -20,7 +20,8 @@ from GUIConstants import TxtInputServerName
 from GUIConstants import TxtInputServerUsername
 from GUIConstants import TxtInputServerPassword
 from GUIConstants import BtnInputServer
-
+from GUIConstants import BtnSelectedRemove
+from GUIConstants import ProductWindow
 import time
 import Server
 import string
@@ -28,21 +29,12 @@ import random
 import threading
 # Main is our initializer for general usage
 
-Sock = Sockets.Sockets
+Sock = Sockets.Sockets()
 
 ServerList = []
 
 def Main():
-    test1 = Server.Server("sfsafaw")
-    ServerList.append(test1)
-    test2 = Server.Server("sfsafaw1")
-    ServerList.append(test2)
-    test1.SetServerName("test1")
-    test2.SetServerName("test2")
-    test1.SetPassword("test1")
-    test2.SetPassword("test2")
-    test1.SetUsername("test1")
-    test2.SetUsername("test2")
+    ProductWindow.withdraw()
     ServerListBox.bind("<<ListboxSelect>>",RefreshSelected)
     i = 0
     for server in ServerList:
@@ -52,11 +44,12 @@ def Main():
         CurrentSelectedServer = ServerList[0]
         ServerListBox.selection_set(0)
 
-    # Sock.Start()
+    Sock.Start()
     BtnLogin.config(command = Login) # Set login button functional
     BtnRegister.config(command = Register) # Set Register button functional
     BtnResetPassword.config(command = ResetPassword) # Set Reset Password button functional
     BtnInputServer.config(command = AddAccount)
+    BtnSelectedRemove.config(command = RemoveAccount)
     LoginWindow.mainloop() # Draw the window
     ProductWindow.mainloop() # Draw the product window
 # on lets say changing the password on the button of changing the password lets send the server a message to update the password
@@ -73,19 +66,36 @@ def AddAccount():
     addserver.SetPassword(TxtInputServerPassword.get("1.0", "end-1c"))
     ServerList.append(addserver)
     ServerListBox.insert(len(ServerList) +1,addserver.ServerName)
-
+    Sock.SendMessage("Create Server")
+    time.sleep(1)
+    Sock.SendMessage(addserver.ServerID)
+    time.sleep(1)
+    Sock.SendMessage(addserver.ServerName)
+    time.sleep(1)
+    Sock.SendMessage(addserver.Username)
+    time.sleep(1)
+    Sock.SendMessage(addserver.Password)
+def RemoveAccount():
+    if(ServerListBox.curselection()[0] == None):
+        return
+    del ServerList[ServerListBox.curselection()[0]]
+    ServerListBox.delete(ServerListBox.curselection()[0])
+    Sock.SendMessage("Delete Server")
+    time.sleep(1)
+    Sock.SendMessage(ServerList[ServerListBox.curselection()[0]].ServerID)
 
 def RecieveServers():
     Sock.SendMessage("Send Servers")
     count = Sock.RecieveMessage();
-    for i in range(0,count):
+    # Divide by 4 as there are 4 instances in each server
+    for i in range(0,int(int(count)/4)): # recieve server details, store in instance
         tempserver = Server.Server(Sock.RecieveMessage())
         tempserver.SetServerName(Sock.RecieveMessage())
         tempserver.SetUsername(Sock.RecieveMessage())
         tempserver.SetPassword(Sock.RecieveMessage())
-        ServerList.append(tempserver)
+        ServerList.append(tempserver) # add instance to the list
+        ServerListBox.insert(len(ServerList) +1,tempserver.ServerName)
         tempserver = None
-
         
 def ResetPassword():
     Sock.SendMessage("Resetting Password") # Tell the server we are resetting a password
@@ -106,6 +116,9 @@ def Login():
     Sock.SendMessage(TxtLoginPassword.get("1.0", "end-1c")) # Send the reading of the textbox from start to end
     Response = Sock.RecieveMessage()
     DrawMessageBox(MSGReason.Info,"Login Response",Response) # Display the respsonse from the server to the client
+    RecieveServers()
+    ProductWindow.deiconify()
+    
 
 def Register():
     if(TxtRegisterPassword.get("1.0", "end") !=  TxtRegisterConfirmPassword.get("1.0", "end")):
