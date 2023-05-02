@@ -99,9 +99,12 @@ def RecieveServers():
         tempserver.SetUsername(Sock.RecieveMessage())
         tempserver.SetPassword(Sock.RecieveMessage())
         ServerList.append(tempserver) # add instance to the list
-        ServerListBox.insert(len(ServerList) +1,tempserver.ServerName)
         tempserver = None
-        
+    BubbleSort(ServerList)
+    j = 0
+    for server in ServerList:
+        ServerListBox.insert(j,server.ServerName)
+        j+=1
 def ResetPassword():
     Sock.SendMessage("Resetting Password") # Tell the server we are resetting a password
     time.sleep(1)
@@ -112,6 +115,31 @@ def ResetPassword():
     Sock.SendMessage(TxtResetPasswordTwoFactor.get("1.0", "end-1c"))# Send the reading of the textbox from start to end
     Response = Sock.RecieveMessage()
     DrawMessageBox(MSGReason.Info,"Login Response",Response) # Display the respsonse from the server to the client
+def BubbleSort(arr):
+    n = len(arr)
+    swapped = False
+    for i in range(n-1):
+        for j in range(0, n-i-1):
+            if arr[j].ServerName > arr[j + 1].ServerName:
+                swapped = True
+                arr[j], arr[j + 1] = arr[j + 1], arr[j]
+         
+        if not swapped:
+            return
+
+def BubbleSortListbox(lb):
+    # Get the number of items in the listbox
+    n = lb.size()
+    
+    # Perform bubble sort on the listbox items
+    for i in range(n-1):
+        for j in range(0, n-i-1):
+            # Compare adjacent items and swap them if they are out of order
+            if lb.get(j) > lb.get(j+1):
+                lb.delete(j)
+                lb.insert(j+1, lb.get(j))
+                lb.delete(j+1)
+                lb.insert(j, lb.get(j+1))
 
 def Login():
     Sock.SendMessage("Login") # Tell the server we are logging in
