@@ -24,6 +24,15 @@ from GUIConstants import BtnSelectedRemove
 from GUIConstants import ProductWindow
 from GUIConstants import BtnCopyServerPassword
 from GUIConstants import BtnCopyServerName
+from GUIConstants import UseSymbols
+from GUIConstants import UseRussian
+from GUIConstants import UseNumbers
+from GUIConstants import End
+from GUIConstants import UseChinese
+from GUIConstants import UseHindi
+from GUIConstants import UseAmharic
+from GUIConstants import BtnRandomPassword
+from string import ascii_lowercase, ascii_uppercase, digits
 import time
 import Server
 import string
@@ -34,7 +43,37 @@ import threading
 Sock = Sockets.Sockets()
 
 ServerList = []
-
+Russian = "БГДЁЖИЙЛПФфЦЧШЩЪЫЬЭЮЯ"
+Symbols = "!=<>'@#$%^&*()[\],.;:-_/+?{|}`~"
+Numbers = digits
+Letters = ascii_uppercase + ascii_uppercase
+Chinese = "诶比西迪伊尺杰大水开勒哦屁吉吾儿诶比西迪伊弗吉尺艾弗吉杰屁吉吾儿八九十开勒马娜哦月人马娜口"
+Hindi = "ऄअआइईउऊऋऌऍऎएऐऑऒओऔकखगघङचछजझञटठडढणतथदधनऩपफबभमयरऱलळऴवशषसहऽॐॠॡ।॥०१२३४५६७८९॰ॲॳॴॵॶॷॹॺॻॼॽॾॿೱೲऀँंःऺऻ़ािीुूृॄॅॆेैॉॊोौ्ॎॏ॒॑॓॔ॕॖॗॢॣ"
+Amharic = "ሀሁሂሃሄህሆሎልሌላሊሉለሐሑሒሓሔሕሖሞምሜማሚሙመሠሡሢሣሤሥሦሮርሬራሪሩረሰሱሲሳሴስሶሾሽሼሻሺሹሸቀቁቂቃቄቅቆቦብቤባቢቡበቨቩቪቫቬቭቮቶትቴታቲቱተቸቹቺቻቼችቾኆኅኄኃኂኁኀነኑኒናኔንኖኞኝኜኛኚኙኘአኡኢኣኤእኦኮክኬካኪኩከኸኹኺኻኼኽኾዎውዌዋዊዉወዐዑዒዓዔዕዖዞዝዜዛዚዙዘዠዡዢዣዤዥዦዮይዬያዪዩየደዱዲዳዴድዶጆጅጄጃጂጁጀገጉጊጋጌግጎጦጥጤጣጢጡጠጨጩጪጫጬጭጮጶጵጴጳጲጱጰጸጹጺጻጼጽጾፆፅፄፃፂፁፀፈፉፊፋፌፍፎፖፕፔፓፒፑፐ፩፪፫፬፭፮፯፰፱፲፳፴፵፶፷፸፹፺፻፼፡።፣፤፥"
+def GetRandChars():
+    try:
+        result = Letters
+        result+= Symbols
+        result+= Numbers
+        result+= Chinese
+        result+= Hindi
+        result+= Amharic
+        result+= Russian
+        return result
+    except:
+        DrawMessageBox(MSGReason.Error,"Password Generation","Error Generating Password Characters") 
+        return Letters
+def Randomise():
+    try:
+        num = random.randint(9, 35)
+        rand = ''.join(random.choice(GetRandChars()) for i in range(num))
+        return str(rand)
+    except:
+        DrawMessageBox(MSGReason.Error,"Password Generation","Error Generating Password. Make sure you configure the password randomiser")
+        return ""
+def RandomPassword():
+    TxtInputServerPassword.delete("1.0", End)
+    TxtInputServerPassword.insert("1.0",Randomise())
 def Main():
     ProductWindow.withdraw()
     ServerListBox.bind("<<ListboxSelect>>",RefreshSelected)
@@ -54,7 +93,7 @@ def Main():
     BtnSelectedRemove.config(command = RemoveAccount)
     BtnCopyServerPassword.config(command = CopyPassword)
     BtnCopyServerName.config(command = CopyUsername)
-
+    BtnRandomPassword.config(command = RandomPassword)
     LoginWindow.mainloop() # Draw the window
     ProductWindow.mainloop() # Draw the product window
 # on lets say changing the password on the button of changing the password lets send the server a message to update the password
@@ -127,19 +166,6 @@ def BubbleSort(arr):
         if not swapped:
             return
 
-def BubbleSortListbox(lb):
-    # Get the number of items in the listbox
-    n = lb.size()
-    
-    # Perform bubble sort on the listbox items
-    for i in range(n-1):
-        for j in range(0, n-i-1):
-            # Compare adjacent items and swap them if they are out of order
-            if lb.get(j) > lb.get(j+1):
-                lb.delete(j)
-                lb.insert(j+1, lb.get(j))
-                lb.delete(j+1)
-                lb.insert(j, lb.get(j+1))
 
 def Login():
     Sock.SendMessage("Login") # Tell the server we are logging in
@@ -156,10 +182,16 @@ def Login():
     LoginWindow.withdraw()
     
 def CopyUsername():
-    LoginWindow.clipboard_append(ServerList[ServerListBox.curselection()[0]].Username)
+    try:
+        LoginWindow.clipboard_append(ServerList[ServerListBox.curselection()[0]].Username)
+    except:
+        DrawMessageBox(MSGReason.Error,"Username Copy","Error Copying Username")
     
 def CopyPassword():
-    LoginWindow.clipboard_append(ServerList[ServerListBox.curselection()[0]].Password)
+    try:
+        LoginWindow.clipboard_append(ServerList[ServerListBox.curselection()[0]].Password)
+    except:
+        DrawMessageBox(MSGReason.Error,"Password Copy","Error Copying Password")
 def Register():
     if(TxtRegisterPassword.get("1.0", "end") !=  TxtRegisterConfirmPassword.get("1.0", "end")):
         DrawMessageBox(MSGReason.Error,"Password Mistmatch", "Password Mistmatch")

@@ -8,6 +8,7 @@ import random
 import string
 
 
+
 class Format(Enum):
     Date = 0,
     Time = 1,

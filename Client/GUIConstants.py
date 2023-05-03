@@ -5,6 +5,8 @@ from tkinter import messagebox
 #from Client import Login
 LoginWindow = tk.Tk()
 
+End = tk.END
+
 LoginWindow.title("Login")
 LoginWindow.geometry("400x225")
 style = ttk.Style()
@@ -20,7 +22,7 @@ ProductNotebook = ttk.Notebook(ProductWindow,width=600, height=750)
 #ProductWindow.withdraw()
 #Change this to save a password. then we auto read it
 def RememberPasswordToggle():
-    if RememberPassword == True:
+    if UseSymbols.get() == True:
         print("Checkbox is checked")
     else:
         print("Checkbox is unchecked")
@@ -52,7 +54,7 @@ RememberPassword = tk.IntVar()
 CBRememberPassword = tk.Checkbutton(TabLogin, text="Remember Password", variable=RememberPassword, command=RememberPasswordToggle)
 CBRememberPassword.place(x=85, y = 100)
 BtnLogin = tk.Button(TabLogin, text="Login", command=LoginWindow.withdraw,font=("Segoe UI", 10))
-BtnLogin.place(x=160,y = 130)
+BtnLogin.place(x=190,y = 130)
 
 TabRegister = ttk.Frame(notebook)
 notebook.add(TabRegister, text="Register")
@@ -119,6 +121,8 @@ LblInputServerPassword = tk.Label(TabServers, text="Password:",font=("Segoe UI",
 LblInputServerPassword.place(x=0,y=570)
 TxtInputServerPassword = tk.Text(TabServers, width=25, height=1)
 TxtInputServerPassword.place(x=0,y=590)
+BtnRandomPassword = tk.Button(TabServers, text="Randomise Password",width=25, height=1)
+BtnRandomPassword.place(x=240,y=588)
 
 BtnInputServer = tk.Button(TabServers, text="Add Account", command=ProductWindow.withdraw,font=("Segoe UI", 10))
 BtnInputServer.place(x=0,y = 620)
@@ -127,6 +131,36 @@ ProductNotebook.add(TabSupport, text="Support")
 
 TabSettings = ttk.Frame(ProductNotebook)
 ProductNotebook.add(TabSettings, text="Settings")
+def NumInput(value):
+    if value.isdigit() or value == "":
+        return True
+    else:
+        return False
+
+
+UseSymbols = tk.IntVar()
+CBUseSymbols = tk.Checkbutton(TabSettings, text="Use Symbols In Password Randomisation", variable=UseSymbols, command=RememberPasswordToggle)
+CBUseSymbols.place(x=5, y = 0)
+
+UseNumbers = tk.IntVar()
+CBUseNumbers = tk.Checkbutton(TabSettings, text="Use Numbers In Password Randomisation", variable=UseNumbers, command=RememberPasswordToggle)
+CBUseNumbers.place(x=5, y = 20)
+
+UseRussian = tk.IntVar()
+CBUseRussian= tk.Checkbutton(TabSettings, text="Use Russian Characters In Password Randomisation", variable=UseRussian, command=RememberPasswordToggle)
+CBUseRussian.place(x=5, y = 40)
+
+UseChinese = tk.IntVar()
+CBUseChinese= tk.Checkbutton(TabSettings, text="Use Chinese Characters In Password Randomisation", variable=UseChinese, command=RememberPasswordToggle)
+CBUseChinese.place(x=5, y = 60)
+
+UseHindi = tk.IntVar()
+CBUseHindi= tk.Checkbutton(TabSettings, text="Use Hindi Characters In Password Randomisation", variable=UseHindi, command=RememberPasswordToggle)
+CBUseHindi.place(x=5, y = 80)
+
+UseAmharic = tk.IntVar()
+CBUseAmharic = tk.Checkbutton(TabSettings, text="Use Amharic Characters In Password Randomisation", variable=UseAmharic, command=RememberPasswordToggle)
+CBUseAmharic.place(x=5, y = 100)
 
 notebook.place(x=0, y=0)
 ProductNotebook.place(x=0,y=0)
