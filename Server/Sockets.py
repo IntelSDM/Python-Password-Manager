@@ -42,10 +42,10 @@ class Sockets:
 
             # Wrap the client socket in a SSL context
             self.Context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-            self.Context.load_cert_chain(CertPath, KeyPath)
+            self.Context.load_cert_chain(CertPath, KeyPath) # load the ssl
             self.Context.verify_mode = ssl.CERT_NONE # Disable verify mode to prevent bugs verifying the CA
             self.ClientSocket = self.Context.wrap_socket(self.ClientSocket, server_side=True)
-            self.SocketList.append(Client.Client(self.ClientSocket))
+            self.SocketList.append(Client.Client(self.ClientSocket)) # add to the socket list a new instance and call the init of the client
 
             #  Clean up, Don't want to waste memory creating local variables
             self.ClientSocket = None 

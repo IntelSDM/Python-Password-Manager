@@ -6,13 +6,13 @@ from tkinter import messagebox
 LoginWindow = tk.Tk()
 
 End = tk.END
-
+# create login window
 LoginWindow.title("Login")
 LoginWindow.geometry("400x225")
 style = ttk.Style()
 style.configure('TNotebook.Tab', padding=(6, 2), font=('Segoe UI', 9))
 notebook = ttk.Notebook(LoginWindow,width=400, height=225)
-
+# create product window
 ProductWindow = tk.Tk()
 ProductWindow.title("Manage Products")
 ProductWindow.geometry("600x750")
@@ -27,6 +27,9 @@ def RememberPasswordToggle():
     else:
         print("Checkbox is unchecked")
 class MSGReason(enum.Enum):
+    """
+    Enum constructor for different message box types
+    """
     Warning = 1
     Info = 2
     Error = 3
@@ -41,7 +44,8 @@ def DrawMessageBox(reason:MSGReason,header: str, information: str):
          messagebox.showwarning(header, information)
 
 TabLogin = ttk.Frame(notebook)
-notebook.add(TabLogin, text="Login")
+notebook.add(TabLogin, text="Login") # login tab
+# Login tab contents
 LblLoginUsername = tk.Label(TabLogin, text="Username:",font=("Segoe UI", 10))
 LblLoginUsername.place(x=150,y=0)
 TxtLoginUsername = tk.Text(TabLogin, width=25, height=1)
@@ -57,8 +61,8 @@ BtnLogin = tk.Button(TabLogin, text="Login", command=LoginWindow.withdraw,font=(
 BtnLogin.place(x=190,y = 130)
 
 TabRegister = ttk.Frame(notebook)
-notebook.add(TabRegister, text="Register")
-
+notebook.add(TabRegister, text="Register")# register tab
+# Register tab contents
 LblRegisterUsername = tk.Label(TabRegister, text="Username:",font=("Segoe UI", 10))
 LblRegisterUsername.place(x=150,y=0)
 TxtRegisterUsername = tk.Text(TabRegister, width=25, height=1)
@@ -75,7 +79,8 @@ BtnRegister = tk.Button(TabRegister, text="Register", command=LoginWindow.withdr
 BtnRegister.place(x=150,y = 150)
 
 TabResetPassword = ttk.Frame(notebook)
-notebook.add(TabResetPassword, text="Reset Password")
+notebook.add(TabResetPassword, text="Reset Password")# reset password tab
+#Reset password contents
 LblResetPasswordUsername = tk.Label(TabResetPassword, text="Username:",font=("Segoe UI", 10))
 LblResetPasswordUsername.place(x=150,y=0)
 TxtResetPasswordUsername = tk.Text(TabResetPassword, width=25, height=1)
@@ -91,8 +96,9 @@ TxtResetPasswordTwoFactor.place(x=85, y = 125)
 BtnResetPassword = tk.Button(TabResetPassword, text="Reset Password", command=LoginWindow.withdraw,font=("Segoe UI", 10))
 BtnResetPassword.place(x=130,y = 150)
 
-TabServers = ttk.Frame(ProductNotebook)
-ProductNotebook.add(TabServers, text="Server")
+TabServers = ttk.Frame(ProductNotebook) # Create product notebook
+ProductNotebook.add(TabServers, text="Server") # add server tab
+# Set up server tab contents
 ServerListBox = tk.Listbox(TabServers,width = 50,height = 30)
 ServerListBox.place(x=0,y = 5)
 TabSupport = ttk.Frame(ProductNotebook)
@@ -127,17 +133,18 @@ BtnRandomPassword.place(x=240,y=588)
 BtnInputServer = tk.Button(TabServers, text="Add Account", command=ProductWindow.withdraw,font=("Segoe UI", 10))
 BtnInputServer.place(x=0,y = 620)
 
-ProductNotebook.add(TabSupport, text="Support")
+ProductNotebook.add(TabSupport, text="Support")# Add support tab
 
 TabSettings = ttk.Frame(ProductNotebook)
-ProductNotebook.add(TabSettings, text="Settings")
+ProductNotebook.add(TabSettings, text="Settings") # Add settings tab
+# Debug Code
 def NumInput(value):
     if value.isdigit() or value == "":
         return True
     else:
         return False
 
-
+# Create the check boxes for the password randomiser settings and add them to the settings tab in the product window
 UseSymbols = tk.IntVar()
 CBUseSymbols = tk.Checkbutton(TabSettings, text="Use Symbols In Password Randomisation", variable=UseSymbols, command=RememberPasswordToggle)
 CBUseSymbols.place(x=5, y = 0)
@@ -162,8 +169,8 @@ UseAmharic = tk.IntVar()
 CBUseAmharic = tk.Checkbutton(TabSettings, text="Use Amharic Characters In Password Randomisation", variable=UseAmharic, command=RememberPasswordToggle)
 CBUseAmharic.place(x=5, y = 100)
 
-notebook.place(x=0, y=0)
-ProductNotebook.place(x=0,y=0)
+notebook.place(x=0, y=0) # set tab position
+ProductNotebook.place(x=0,y=0) # set product tab positiob
 
 
 #DrawMessageBox(MSGReason.Error,"header","Info")
